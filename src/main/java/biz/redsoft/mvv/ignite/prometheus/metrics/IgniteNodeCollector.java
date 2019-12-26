@@ -13,6 +13,9 @@ import java.util.stream.Collectors;
 
 public class IgniteNodeCollector extends Collector {
 
+  private static final String METRIC_IGNITE_REGION_NAME = "name";
+  private static final String METRIC_LABEL_NODE_ID = "nodeId";
+
   private final RestTemplate restTemplate = new RestTemplate();
 
   private final String url;
@@ -37,9 +40,10 @@ public class IgniteNodeCollector extends Collector {
 
     List<MetricFamilySamples> samples = new ArrayList<>();
 
-    List<MetricFamilySamples> memoryMetrics = collectMemoryMetrics("memoryMetrics", (Map<String, Map>) response.getResponse(), memoryRegionFilters);
+    Map<String, Map> metricMap = (Map<String, Map>) response.getResponse();
+    List<MetricFamilySamples> memoryMetrics = collectMemoryMetrics("memoryMetrics", metricMap, memoryRegionFilters);
     samples.addAll(memoryMetrics);
-    List<MetricFamilySamples> persistenceMetrics = collectPersistenceMetrics("persistenceMetrics", (Map<String, Map>) response.getResponse());
+    List<MetricFamilySamples> persistenceMetrics = collectPersistenceMetrics("persistenceMetrics", metricMap);
     samples.addAll(persistenceMetrics);
     return samples;
   }
@@ -49,20 +53,20 @@ public class IgniteNodeCollector extends Collector {
   ) {
     Map<String, Map> result = (Map<String, Map>) response.get("result");
     Map<String, List<Map<String, Object>>> metrics = result.get(metricGroup);
-    List<String> labels = Arrays.asList("nodeId", "regionName");
+    List<String> labels = Arrays.asList(METRIC_LABEL_NODE_ID, "regionName");
     return metrics.entrySet().stream().flatMap(e -> {
       String nodeId = e.getKey();
       List<Map<String, Object>> regionMetrics = e.getValue();
       return regionMetrics.stream()
               .filter(region -> {
-                String regionName = (String) region.get("name");
+                String regionName = (String) region.get(METRIC_IGNITE_REGION_NAME);
                 return memoryRegionFilters == null || memoryRegionFilters.isEmpty() || memoryRegionFilters.contains(regionName);
               })
               .flatMap(region -> {
-                String regionName = (String) region.get("name");
+                String regionName = (String) region.get(METRIC_IGNITE_REGION_NAME);
                 List<String> labelValues = Arrays.asList(nodeId, regionName);
                 return region.entrySet().stream()
-                        .filter(entry -> !"name".equals(entry.getKey()))
+                        .filter(entry -> !METRIC_IGNITE_REGION_NAME.equals(entry.getKey()))
                         .map(entry -> createMetricSample(metricGroup, entry.getKey(), labels, labelValues, entry.getValue()));
               });
     }).collect(Collectors.toList());
@@ -71,7 +75,7 @@ public class IgniteNodeCollector extends Collector {
   private static List<MetricFamilySamples> collectPersistenceMetrics(String metricGroup, Map<String, Map> response) {
     Map<String, Map> result = (Map<String, Map>) response.get("result");
     Map<String, Map<String, Object>> metrics = result.get(metricGroup);
-    List<String> labels = Collections.singletonList("nodeId");
+    List<String> labels = Collections.singletonList(METRIC_LABEL_NODE_ID);
     return metrics.entrySet().stream().flatMap(e -> {
       List<String> labelValues = Collections.singletonList(e.getKey());
       Map<String, Object> regionMetrics = e.getValue();
