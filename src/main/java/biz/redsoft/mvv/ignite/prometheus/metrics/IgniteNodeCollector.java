@@ -13,12 +13,15 @@ import java.util.stream.Collectors;
 
 public class IgniteNodeCollector extends Collector {
 
-  private final String url;
-
   private final RestTemplate restTemplate = new RestTemplate();
 
-  public IgniteNodeCollector(String url) {
+  private final String url;
+
+  private final Set<String> memoryRegionFilters;
+
+  public IgniteNodeCollector(String url, Set<String> memoryRegionFilters) {
     this.url = url;
+    this.memoryRegionFilters = memoryRegionFilters;
   }
 
   @Override
@@ -34,28 +37,35 @@ public class IgniteNodeCollector extends Collector {
 
     List<MetricFamilySamples> samples = new ArrayList<>();
 
-    List<MetricFamilySamples> memoryMetrics = collectMemoryMetrics("memoryMetrics", (Map<String, Map>) response.getResponse());
+    List<MetricFamilySamples> memoryMetrics = collectMemoryMetrics("memoryMetrics", (Map<String, Map>) response.getResponse(), memoryRegionFilters);
     samples.addAll(memoryMetrics);
     List<MetricFamilySamples> persistenceMetrics = collectPersistenceMetrics("persistenceMetrics", (Map<String, Map>) response.getResponse());
     samples.addAll(persistenceMetrics);
     return samples;
   }
 
-  private static List<MetricFamilySamples> collectMemoryMetrics(String metricGroup, Map<String, Map> response) {
+  private static List<MetricFamilySamples> collectMemoryMetrics(String metricGroup, Map<String, Map> response,
+                                                                Set<String> memoryRegionFilters
+  ) {
     Map<String, Map> result = (Map<String, Map>) response.get("result");
     Map<String, List<Map<String, Object>>> metrics = result.get(metricGroup);
     List<String> labels = Arrays.asList("nodeId", "regionName");
     return metrics.entrySet().stream().flatMap(e -> {
-              String nodeId = e.getKey();
-              List<Map<String, Object>> regionMetrics = e.getValue();
-              return regionMetrics.stream().flatMap(region -> {
+      String nodeId = e.getKey();
+      List<Map<String, Object>> regionMetrics = e.getValue();
+      return regionMetrics.stream()
+              .filter(region -> {
+                String regionName = (String) region.get("name");
+                return memoryRegionFilters == null || memoryRegionFilters.isEmpty() || memoryRegionFilters.contains(regionName);
+              })
+              .flatMap(region -> {
                 String regionName = (String) region.get("name");
                 List<String> labelValues = Arrays.asList(nodeId, regionName);
                 return region.entrySet().stream()
                         .filter(entry -> !"name".equals(entry.getKey()))
                         .map(entry -> createMetricSample(metricGroup, entry.getKey(), labels, labelValues, entry.getValue()));
               });
-            }).collect(Collectors.toList());
+    }).collect(Collectors.toList());
   }
 
   private static List<MetricFamilySamples> collectPersistenceMetrics(String metricGroup, Map<String, Map> response) {
