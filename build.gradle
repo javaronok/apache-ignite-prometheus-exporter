@@ -1,0 +1,35 @@
+plugins {
+	id 'org.springframework.boot' version '2.2.2.RELEASE'
+	id 'io.spring.dependency-management' version '1.0.8.RELEASE'
+	id 'java'
+}
+
+group = 'biz.redsoft.mvv.ignite'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '1.8'
+
+apply plugin: 'idea'
+
+repositories {
+	mavenCentral()
+}
+
+def igniteVersion = '2.7.5'
+def prometheusClientVersion = '0.8.0'
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+
+	compile("org.apache.ignite:ignite-core:${igniteVersion}")
+	compile "io.prometheus:simpleclient:${prometheusClientVersion}"
+	compile "io.prometheus:simpleclient_common:${prometheusClientVersion}"
+
+	testImplementation('org.springframework.boot:spring-boot-starter-test') {
+		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+	}
+}
+
+test {
+	useJUnitPlatform()
+}
