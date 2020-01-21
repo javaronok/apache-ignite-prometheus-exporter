@@ -12,7 +12,7 @@ repositories {
 	mavenCentral()
 }
 
-def igniteVersion = '2.7.5'
+def igniteVersion = '2.7.6'
 def prometheusClientVersion = '0.8.0'
 
 dependencies {
