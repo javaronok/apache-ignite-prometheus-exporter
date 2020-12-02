@@ -1,0 +1,13 @@
+# my global config
+global:
+  scrape_interval:     10s
+  evaluation_interval: 30s
+
+scrape_configs:
+
+  - job_name: 'ignite-test-instance'
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    metrics_path: '/prometheus'
+    static_configs:
+      - targets: ['localhost:9000']
