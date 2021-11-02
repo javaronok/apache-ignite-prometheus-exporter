@@ -21,6 +21,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 
+	compileOnly "org.springframework.boot:spring-boot-configuration-processor"
+
 	compile("org.apache.ignite:ignite-core:${igniteVersion}")
 
 	compile("org.apache.ignite:visor-cache-metrics:1.0")

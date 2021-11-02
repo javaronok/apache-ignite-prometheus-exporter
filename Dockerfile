@@ -6,6 +6,8 @@ ADD ./deploy /app
 
 ENV IGNITE_REST_URL="localhost:8080"
 ENV IGNITE_REGION_FILTER="Default_Region"
+ENV METRICS_NODE_ENABLED="true"
+ENV METRICS_QUERY_ENABLED="true"
 
 WORKDIR /app
 
