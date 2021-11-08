@@ -15,6 +15,10 @@ Address for rest-api module is configured as property: `ignite.http.rest.url=<ho
 
 You can setup filter for ignite data region metrics with help property: `ignite.metrics.memory.regions.filter=STATES,REFERENCES`
 
+You can turn on node or query metrics with different settings:
+ - `ignite.metrics.node.collector.enabled=true` - Turn on ignite node metrics (memory, WAL, checkpoint, pages) 
+ - `ignite.metrics.query.collector.enabled=true` - Turn on ignite query metrics (min, max, avg, count executions and failures)
+
 ### Running exporter through the console 
 
 ```bash

@@ -1,0 +1,28 @@
+{
+  "properties": [
+    {
+      "name": "ignite.http.rest.url",
+      "type": "java.lang.String",
+      "description": "Ignite cluster URLs, ex. 192.168.0.1:8080,192.168.0.2:8080."
+    },
+    {
+      "name": "ignite.metrics.memory.regions.filter",
+      "type": "java.lang.String",
+      "description": "Ignite data regions."
+    },
+    {
+      "name": "ignite.metrics.node.collector.enabled",
+      "type": "java.lang.String",
+      "description": "Turn on ignite node metrics.",
+      "defaultValue": "true"
+    },
+    {
+      "name": "ignite.metrics.query.collector.enabled",
+      "type": "java.lang.String",
+      "description": "Turn on ignite query metrics.",
+      "defaultValue": "true"
+    }
+  ],
+  "hints": [
+  ]
+}
