@@ -67,7 +67,8 @@ public class IgniteNodeCollector extends Collector {
                 List<String> labelValues = Arrays.asList(nodeId, regionName);
                 return region.entrySet().stream()
                         .filter(entry -> !METRIC_IGNITE_REGION_NAME.equals(entry.getKey()))
-                        .map(entry -> createMetricSample(metricGroup, entry.getKey(), labels, labelValues, entry.getValue()));
+                        .map(entry -> MetricCollectorUtils.createMetricSample(
+                                metricGroup, entry.getKey(), entry.getValue(), Type.GAUGE, labels, labelValues));
               });
     }).collect(Collectors.toList());
   }
@@ -80,17 +81,8 @@ public class IgniteNodeCollector extends Collector {
       List<String> labelValues = Collections.singletonList(e.getKey());
       Map<String, Object> regionMetrics = e.getValue();
       return regionMetrics.entrySet().stream()
-              .map(entry -> createMetricSample(metricGroup, entry.getKey(), labels, labelValues, entry.getValue()));
+              .map(entry -> MetricCollectorUtils.createMetricSample(
+                      metricGroup, entry.getKey(), entry.getValue(), Type.GAUGE, labels, labelValues));
     }).collect(Collectors.toList());
-  }
-
-  private static MetricFamilySamples createMetricSample(String metricGroup, String metricName,
-                                                        List<String> labelNames, List<String> labelValues,
-                                                        Object value
-  ) {
-    String sampleMetricName = Collector.sanitizeMetricName(metricGroup + "_" + metricName);
-    Double sampleValue = Double.valueOf(String.valueOf(value));
-    MetricFamilySamples.Sample sample = new MetricFamilySamples.Sample(sampleMetricName, labelNames, labelValues, sampleValue);
-    return new MetricFamilySamples(sampleMetricName, Type.GAUGE, sampleMetricName, Collections.singletonList(sample));
   }
 }

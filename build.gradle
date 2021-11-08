@@ -9,17 +9,24 @@ group = 'biz.redsoft.mvv.ignite'
 sourceCompatibility = '1.8'
 
 repositories {
+	mavenLocal()
 	mavenCentral()
+	maven { url "https://maven.pkg.github.com/javaronok/apache-ignite-visor-cache-metrics" }
 }
 
-def igniteVersion = '2.7.6'
+def igniteVersion = '2.8.1'
 def prometheusClientVersion = '0.8.0'
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 
+	compileOnly "org.springframework.boot:spring-boot-configuration-processor"
+
 	compile("org.apache.ignite:ignite-core:${igniteVersion}")
+
+	compile("org.apache.ignite:visor-cache-metrics:1.0")
+
 	compile "io.prometheus:simpleclient:${prometheusClientVersion}"
 	compile "io.prometheus:simpleclient_common:${prometheusClientVersion}"
 
